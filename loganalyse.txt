@@ -1,0 +1,4 @@
+2019-02-25 20:13:14.382865 : analyse script started - online = True 
+2019-02-25 20:13:15.111409 : analysiserror : 1 - General exception 
+2019-02-25 20:13:16.766556 : analysiserror : 1 - General exception 
+2019-02-25 20:13:16.992246 : analysiserror : 1 - General exception 
