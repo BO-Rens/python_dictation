@@ -56,13 +56,13 @@ def callback1(channel):
             recording = False
             print('button press request stop recording')
             stoprecording = True
-            leds(0)
+            #leds(0)
 
         else :
             recording = True
             print('button press request start recording')
             startrecording = True
-            leds(1)
+            #leds(1)
 
 # Function to write log lines - appending the new line
 def log(line):
@@ -80,10 +80,14 @@ def leds(patern):
     led.off()
     #global colorsA
     #global colorsB
-    rf=open('recfile' , 'wb')
-    pickle.dump(patern,rf)
-    rf.close()
-    led.blinking()
+    try:
+    	rf=open('recfile' , 'wb')
+    	pickle.dump(patern,rf)
+    	led.blinking()
+    except:
+    	log('update blinking failed')
+    finally:
+    	rf.close()
 
 #########################
 ##### MAIN PROGRAM ######
@@ -119,6 +123,7 @@ while True:
 				startrecording = False
 				datetimestr=datetimestring()
 				print("recording started : " + datetimestr)
+				leds(1)
 			except:
 				log('recording failed')
 		data = stream.read(CHUNK)
@@ -143,7 +148,7 @@ while True:
 			except:
 				log('failed to convert recording to wav')
 				led()
-			# Turn of the leds
+			# Turn off the leds
 			leds(0)
 			# After recording the filename is added to the recordings list with status '1' : to be converted
 			try : 

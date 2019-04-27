@@ -133,34 +133,51 @@ class Pixels:
 
         self.next.clear()
         while not self.next.is_set():
-            
-            fr = open('recfile','rb') 
-            patern = pickle.load(fr)  
-            fr.close()
+            try:
+                fr = open('recfile','rb') 
+                paterna = pickle.load(fr)  
+            except:
+                paterna = 0
+            finally:
+                fr.close()
 
-            if patern == 1: #recording - led 1 blinking red
+            if paterna == 1: #recording - led 1 blinking red
                 colorsA[6:]=50, 0, 0
                 colorsB[6:]=0, 0, 0
-            elif patern ==2: #not recording - led 1 off
+            elif paterna ==2: #not recording - led 1 off
                 colorsA[6:]=0, 0, 0
                 colorsB[6:]=0, 0, 0
-            elif patern ==3: # error : solid red
+            elif paterna ==3: # error : solid red
                 colorsA[6:]=50, 0, 0
                 colorsB[6:]=50, 0, 0
             else:
                 colorsA[6:]=0, 0, 0
                 colorsB[6:]=0, 0, 0
 
-            fa = open('anafile','rb') 
-            patern = pickle.load(fa)  
-            fa.close()
+            try:
+                fa = open('anafile','rb') 
+                paternb = pickle.load(fa)  
+            except: 
+                paternb = 0
+            finally:
+                fa.close()
 
-            if patern == 1: #online  - led 3 solid blue 
+            if paternb == 1: # online  - led 3 solid blue 
                 colorsA[:3]=0, 0, 50
                 colorsB[:3]=0, 0, 50
-            elif patern ==2: #analysis in progress - led 3 blinking blue
+            elif paternb ==2: # analysis in progress - led 3 blinking blue
                 colorsA[:3]=0, 0, 0
                 colorsB[:3]=0, 0, 50
+            elif paternb ==3: # mail error - led 3 solid red
+                colorsA[:3]=50, 0, 0
+                colorsB[:3]=50, 0, 0
+            elif paternb ==4: # analysis error - led 3 blinking red
+                colorsA[:3]=50, 0, 0
+                colorsB[:3]=0, 0, 0
+            elif paternb ==0: # offline - led 3 off
+                colorsA[:3]=0, 0, 0
+                colorsB[:3]=0, 0, 0
+
             else:
                 colorsA[:3]=0, 0, 0
                 colorsB[:3]=0, 0, 0

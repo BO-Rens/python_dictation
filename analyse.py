@@ -46,10 +46,6 @@ def sendmail(bodytext,subject):
 	password = config.get("mail","passwd")
 	to = config.get("mail","recipient")
 	sendr = config.get("mail","sender")
-	log(sendr)
-	log(to)
-	log(password)
-
 	# Create the enclosing (outer) message
 	outer = MIMEMultipart()
 	outer['Subject'] = str(subject) ###       =>       TO BE DEBUGGED - NO SUBJECT IN MAIL !!!
@@ -65,9 +61,12 @@ def sendmail(bodytext,subject):
 			s.login(sendr, password)
 			s.sendmail(sendr, to, bodytext)
 			s.close()
-		print("Email sent!")
+			print("Email sent!")
 	except:
+	
+		print('unable to send email')
 		log('unable to send email')
+		leds(3)
 
 # Function for audio analysis of the presented .wav file
 #
@@ -98,9 +97,11 @@ def speechrecognition(filelocationstring):
     else:
         print('analysis sucessfull : ')
         analysiserror = 0
+        leds(1) # back to online
     finally:
         if analysiserror > 0 :
         	log('analysiserror : ' +  str(analysiserror) + ' - ' + returnstr)
+        	leds(4)
         return returnstr
 
 # Function to determine if the system is connected to the internet for analysis
@@ -111,22 +112,23 @@ def online():
         if urllib.request.urlopen("https://www.google.be").getcode() == 200:
             status = True
             leds(1)
-        else:
-            status = False
-            leds(0)
     except:
-        status == False
+        status = False
         log('failed to check connectivity')
+        leds(0)
     return status
 
 # Function to let the leds flash or be set with a static color
 #
 # code corresponding to the led is saved to a picle file for use in a paralel process
 def leds(patern):
-	fa = open('anafile', 'wb')
-	pickle.dump(patern, fa)
-	fa.close()
-
+	try:
+		fa = open('anafile', 'wb')
+		pickle.dump(patern, fa)
+	except:
+		log('error setting led patern')
+	finally:
+		fa.close()
 # Function to write back to the CSV file
 # Writes the Array containing the recordings and status back to the CSV file
 # csv.DictWriter was chosen over writer to keep the correct order of the fields
@@ -179,7 +181,6 @@ leds(1)
 # led.wakeup()
 time.sleep(2)
 
-
 analysiserror = 0
 directorystring = str('/home/pi/Python/dictation/recordings/')
 returnstring = str(' ')
@@ -189,7 +190,6 @@ log('analyse script started - online = ' + str(online()))
 while True:
 	if online() == True:
 		recordings_array=read_csv()
-		
 		i=0
 		while i < len(recordings_array):
 			#print ('recordings_array[i][1] : ' + recordings_array[i][1])
@@ -197,6 +197,7 @@ while True:
 				returnstring=speechrecognition(directorystring + str(recordings_array[i][0]) + '.wav')
 				if analysiserror == 0:
 					sendmail(returnstring,str(recordings_array[i][0]))
+					print(returnstring)
 					recordings_array[i][1]='0'
 
 				else:
@@ -206,10 +207,11 @@ while True:
 				# (in case an new recording was made during ongoing analysis) 
 				update_csv(recordings_array)
 				recordings_array=read_csv()
+				print(returnstring)
 				#print('line ==1')
 			print('array item : '+ str(i) + ' recording : ' + recordings_array[i][0] + ' - ' + recordings_array[i][1])
 			i+=1
-	timer = 5
+	timer = 15
 	while timer > 0:
 		print (str(timer))
 		time.sleep(1)
@@ -220,5 +222,6 @@ while True:
 ################################
 # TO DO (in order of priority)
 # - Start recording without button press upon reboot - solved 
+# - \u20ac character returned from analysis cannot be mailed
 # - mail subject not set
 ################################
